@@ -1,108 +1,120 @@
-body{
-margin:0;
-font-family:Arial;
-background:#0f172a;
-color:white;
-}
+<!DOCTYPE html>
+<html>
 
-.container{
-display:flex;
-height:100vh;
-}
+<head>
 
-.sidebar{
-width:230px;
-background:#020617;
-padding:20px;
-}
+<meta charset="UTF-8">
+<title>Smart Intersection Control Center</title>
 
-.sidebar h2{
-text-align:center;
-margin-bottom:40px;
-}
+<link rel="stylesheet" href="style.css">
 
-.sidebar ul{
-list-style:none;
-padding:0;
-}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-.sidebar li{
-padding:14px;
-cursor:pointer;
-border-radius:6px;
-}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-.sidebar li:hover{
-background:#1e293b;
-}
+</head>
 
-.content{
-flex:1;
-padding:30px;
-background:#0f172a;
-}
+<body>
 
-.section{
-display:block;
-}
+<div class="container">
 
-.hidden{
-display:none;
-}
+<div class="sidebar">
 
-.cards{
-display:flex;
-gap:20px;
-}
+<h2>🚦 SmartCity</h2>
 
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-width:180px;
-text-align:center;
-}
+<ul>
+<li onclick="showSection('dashboard')">🏠 Dashboard</li>
+<li onclick="showSection('traffic')">🚗 Traffic</li>
+<li onclick="showSection('pollution')">🌫 Pollution</li>
+<li onclick="showSection('mapSection')">🗺 Map</li>
+<li onclick="showSection('lights')">🚦 Lights</li>
+<li onclick="showSection('alerts')">⚠ Alerts</li>
+</ul>
 
-.card p{
-font-size:26px;
-font-weight:bold;
-}
+</div>
 
-canvas{
-background:white;
-border-radius:10px;
-padding:10px;
-}
+<div class="content">
 
-#map{
-height:400px;
-border-radius:10px;
-margin-top:20px;
-}
+<div id="dashboard" class="section">
 
-.traffic-light{
-width:70px;
-background:#111;
-padding:10px;
-border-radius:10px;
-}
+<h1>System Overview</h1>
 
-.light{
-width:45px;
-height:45px;
-border-radius:50%;
-background:#444;
-margin:10px auto;
-}
+<div class="cards">
 
-.red.active{
-background:red;
-}
+<div class="card">
+<h3>Vehicles</h3>
+<p id="vehicles">120</p>
+</div>
 
-.yellow.active{
-background:yellow;
-}
+<div class="card">
+<h3>Pollution</h3>
+<p id="pollutionValue">45 AQI</p>
+</div>
 
-.green.active{
-background:lime;
-}
+<div class="card">
+<h3>Noise</h3>
+<p id="noiseValue">70 dB</p>
+</div>
+
+</div>
+
+</div>
+
+<div id="traffic" class="section hidden">
+
+<h1>Traffic Monitoring</h1>
+
+<canvas id="trafficChart"></canvas>
+
+</div>
+
+<div id="pollution" class="section hidden">
+
+<h1>Pollution Monitoring</h1>
+
+<canvas id="pollutionChart"></canvas>
+
+</div>
+
+<div id="mapSection" class="section hidden">
+
+<h1>Intersection Map</h1>
+
+<div id="map"></div>
+
+</div>
+
+<div id="lights" class="section hidden">
+
+<h1>Traffic Lights</h1>
+
+<div class="traffic-light">
+
+<div class="light red"></div>
+<div class="light yellow"></div>
+<div class="light green active"></div>
+
+</div>
+
+</div>
+
+<div id="alerts" class="section hidden">
+
+<h1>System Alerts</h1>
+
+<ul>
+<li>⚠ Traffic congestion detected</li>
+<li>⚠ Pollution level rising</li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
