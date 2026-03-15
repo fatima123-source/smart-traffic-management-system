@@ -39,7 +39,6 @@ background:#1e293b;
 .content{
 flex:1;
 padding:30px;
-background:#0f172a;
 }
 
 .section{
@@ -53,19 +52,19 @@ display:none;
 .cards{
 display:flex;
 gap:20px;
+flex-wrap:wrap;
 }
 
 .card{
 background:#1e293b;
 padding:20px;
 border-radius:10px;
-width:180px;
+width:200px;
 text-align:center;
 }
 
 .card p{
-font-size:26px;
-font-weight:bold;
+font-size:20px;
 }
 
 canvas{
@@ -80,11 +79,18 @@ border-radius:10px;
 margin-top:20px;
 }
 
+.lights-grid{
+display:flex;
+gap:40px;
+flex-wrap:wrap;
+}
+
 .traffic-light{
-width:70px;
+width:80px;
 background:#111;
 padding:10px;
 border-radius:10px;
+text-align:center;
 }
 
 .light{
@@ -92,17 +98,9 @@ width:45px;
 height:45px;
 border-radius:50%;
 background:#444;
-margin:10px auto;
+margin:8px auto;
 }
 
-.red.active{
-background:red;
-}
-
-.yellow.active{
-background:yellow;
-}
-
-.green.active{
-background:lime;
-}
+.red.active{background:red;}
+.yellow.active{background:yellow;}
+.green.active{background:lime;}
