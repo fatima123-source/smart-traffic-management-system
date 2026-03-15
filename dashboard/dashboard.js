@@ -11,7 +11,44 @@ document.getElementById(id).classList.remove("hidden");
 }
 
 
-// TRAFFIC CHART
+const routes=["centre","nord","sud","est","ouest"];
+
+function updateData(){
+
+let totalVehicles=0;
+let totalNoise=0;
+let totalPollution=0;
+
+routes.forEach(route=>{
+
+let vehicles=Math.floor(Math.random()*200);
+let noise=Math.floor(Math.random()*90);
+let pollution=Math.floor(Math.random()*100);
+
+document.getElementById("veh-"+route).innerText=vehicles;
+document.getElementById("noise-"+route).innerText=noise;
+document.getElementById("pollution-"+route).innerText=pollution;
+
+totalVehicles+=vehicles;
+totalNoise+=noise;
+totalPollution+=pollution;
+
+if(pollution>80){
+let alerts=document.getElementById("alertsList");
+alerts.innerHTML+="<li>⚠ Pollution élevée dans "+route+"</li>";
+}
+
+});
+
+document.getElementById("vehicles").innerText=totalVehicles;
+document.getElementById("noiseValue").innerText=Math.floor(totalNoise/5)+" dB";
+document.getElementById("pollutionValue").innerText=Math.floor(totalPollution/5)+" AQI";
+
+}
+
+setInterval(updateData,4000);
+
+
 
 const trafficCtx=document.getElementById("trafficChart");
 
@@ -27,8 +64,6 @@ data:[30,45,40,60,70]
 });
 
 
-// POLLUTION CHART
-
 const pollutionCtx=document.getElementById("pollutionChart");
 
 new Chart(pollutionCtx,{
@@ -43,60 +78,15 @@ data:[40,55,35]
 });
 
 
-// TRAFFIC LIGHT ANIMATION
-
-const lights=document.querySelectorAll(".light");
-
-let current=2;
-
-function changeLight(){
-
-lights.forEach(light=>light.classList.remove("active"));
-
-current++;
-
-if(current>2) current=0;
-
-lights[current].classList.add("active");
-
-}
-
-setInterval(changeLight,3000);
-
-
-// SIMULATED DATA
-
-function updateData(){
-
-let vehicles=Math.floor(Math.random()*200);
-let noise=Math.floor(Math.random()*90);
-let pollution=Math.floor(Math.random()*100);
-
-document.getElementById("vehicles").innerText=vehicles;
-document.getElementById("noiseValue").innerText=noise+" dB";
-document.getElementById("pollutionValue").innerText=pollution+" AQI";
-
-}
-
-setInterval(updateData,4000);
-
-
-// MAP
-
 var map=L.map('map').setView([33.5731,-7.5898],16);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-
-// TRAFFIC LIGHT MARKER
-
 L.marker([33.5731,-7.5898]).addTo(map)
-.bindPopup("Traffic Light");
+.bindPopup("Smart Intersection");
 
-
-// CAR SIMULATION
 
 var car=L.marker([33.5730,-7.5895]).addTo(map);
 
