@@ -27,6 +27,7 @@
 <li onclick="showSection('dashboard')">🏠 Dashboard</li>
 <li onclick="showSection('traffic')">🚗 Traffic</li>
 <li onclick="showSection('pollution')">🌫 Pollution</li>
+<li onclick="showSection('zones')">📊 Zone Statistics</li>
 <li onclick="showSection('mapSection')">🗺 Map</li>
 <li onclick="showSection('lights')">🚦 Lights</li>
 <li onclick="showSection('alerts')">⚠ Alerts</li>
@@ -36,6 +37,8 @@
 
 <div class="content">
 
+<!-- DASHBOARD -->
+
 <div id="dashboard" class="section">
 
 <h1>System Overview</h1>
@@ -43,23 +46,26 @@
 <div class="cards">
 
 <div class="card">
-<h3>Vehicles</h3>
-<p id="vehicles">120</p>
+<h3>Total Vehicles</h3>
+<p id="vehicles">0</p>
 </div>
 
 <div class="card">
-<h3>Pollution</h3>
-<p id="pollutionValue">45 AQI</p>
+<h3>Average Pollution</h3>
+<p id="pollutionValue">0 AQI</p>
 </div>
 
 <div class="card">
-<h3>Noise</h3>
-<p id="noiseValue">70 dB</p>
+<h3>Average Noise</h3>
+<p id="noiseValue">0 dB</p>
 </div>
 
 </div>
 
 </div>
+
+
+<!-- TRAFFIC -->
 
 <div id="traffic" class="section hidden">
 
@@ -69,6 +75,9 @@
 
 </div>
 
+
+<!-- POLLUTION -->
+
 <div id="pollution" class="section hidden">
 
 <h1>Pollution Monitoring</h1>
@@ -76,6 +85,57 @@
 <canvas id="pollutionChart"></canvas>
 
 </div>
+
+
+<!-- ZONES -->
+
+<div id="zones" class="section hidden">
+
+<h1>Zone Statistics</h1>
+
+<div class="cards">
+
+<div class="card">
+<h3>Centre</h3>
+<p>Vehicles: <span id="veh-centre">0</span></p>
+<p>Noise: <span id="noise-centre">0</span> dB</p>
+<p>Pollution: <span id="pollution-centre">0</span></p>
+</div>
+
+<div class="card">
+<h3>Nord</h3>
+<p>Vehicles: <span id="veh-nord">0</span></p>
+<p>Noise: <span id="noise-nord">0</span> dB</p>
+<p>Pollution: <span id="pollution-nord">0</span></p>
+</div>
+
+<div class="card">
+<h3>Sud</h3>
+<p>Vehicles: <span id="veh-sud">0</span></p>
+<p>Noise: <span id="noise-sud">0</span> dB</p>
+<p>Pollution: <span id="pollution-sud">0</span></p>
+</div>
+
+<div class="card">
+<h3>Est</h3>
+<p>Vehicles: <span id="veh-est">0</span></p>
+<p>Noise: <span id="noise-est">0</span> dB</p>
+<p>Pollution: <span id="pollution-est">0</span></p>
+</div>
+
+<div class="card">
+<h3>Ouest</h3>
+<p>Vehicles: <span id="veh-ouest">0</span></p>
+<p>Noise: <span id="noise-ouest">0</span> dB</p>
+<p>Pollution: <span id="pollution-ouest">0</span></p>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- MAP -->
 
 <div id="mapSection" class="section hidden">
 
@@ -85,28 +145,62 @@
 
 </div>
 
+
+<!-- LIGHTS -->
+
 <div id="lights" class="section hidden">
 
 <h1>Traffic Lights</h1>
 
-<div class="traffic-light">
+<div class="lights-grid">
 
+<div class="traffic-light" id="light-centre">
+<h3>Centre</h3>
 <div class="light red"></div>
 <div class="light yellow"></div>
 <div class="light green active"></div>
+</div>
 
+<div class="traffic-light" id="light-nord">
+<h3>Nord</h3>
+<div class="light red"></div>
+<div class="light yellow"></div>
+<div class="light green"></div>
+</div>
+
+<div class="traffic-light" id="light-sud">
+<h3>Sud</h3>
+<div class="light red"></div>
+<div class="light yellow"></div>
+<div class="light green"></div>
+</div>
+
+<div class="traffic-light" id="light-est">
+<h3>Est</h3>
+<div class="light red"></div>
+<div class="light yellow"></div>
+<div class="light green"></div>
+</div>
+
+<div class="traffic-light" id="light-ouest">
+<h3>Ouest</h3>
+<div class="light red"></div>
+<div class="light yellow"></div>
+<div class="light green"></div>
 </div>
 
 </div>
+
+</div>
+
+
+<!-- ALERTS -->
 
 <div id="alerts" class="section hidden">
 
 <h1>System Alerts</h1>
 
-<ul>
-<li>⚠ Traffic congestion detected</li>
-<li>⚠ Pollution level rising</li>
-</ul>
+<ul id="alertsList"></ul>
 
 </div>
 
