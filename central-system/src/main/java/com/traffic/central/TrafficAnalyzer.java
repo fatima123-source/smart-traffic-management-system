@@ -1,7 +1,7 @@
 package com.traffic.central;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import java.sql.SQLException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class TrafficAnalyzer {
 
@@ -16,7 +16,8 @@ public class TrafficAnalyzer {
             // ======================
             // Extraire l'ID de la route
             // ======================
-            int routeId = 1; // valeur par défaut
+            int routeId = 1;
+
             if (data.contains("Route")) {
                 String routePart = data.split(":")[0];
                 routeId = Integer.parseInt(routePart.replaceAll("[^0-9]", ""));
@@ -25,15 +26,70 @@ public class TrafficAnalyzer {
             int sensorId = db.getSensorIdByRoute(routeId);
 
             // ======================
-            // CAS BRUIT
+            // TRAFFIC ANALYSIS
+            // ======================
+            if (data.contains("Traffic")) {
+
+                int volume = 0;
+                double speed = 0;
+
+                try {
+                    String[] parts = data.split(",");
+
+                    volume = Integer.parseInt(parts[1].trim());
+                    speed = Double.parseDouble(parts[2].trim());
+
+                } catch (Exception e) {
+                    System.out.println("Invalid traffic data format");
+                }
+
+                db.insertTrafficFull(routeId, volume, speed);
+
+                if (volume > 300) {
+                    System.out.println("ALERT: High traffic detected!");
+                }
+            }
+
+            // ======================
+            // POLLUTION ANALYSIS
+            // ======================
+            if (data.contains("Pollution")) {
+
+                String typePollution = "Air";
+                double niveau = 0;
+
+                try {
+
+                    String[] parts = data.split(",");
+
+                    typePollution = parts[1].trim();
+                    niveau = Double.parseDouble(parts[2].trim());
+
+                } catch (Exception e) {
+                    System.out.println("Invalid pollution data format");
+                }
+
+                db.insertPollutionFull(routeId, typePollution, niveau);
+
+                if (niveau > 150) {
+                    System.out.println("ALERT: High pollution level detected!");
+                }
+            }
+
+            // ======================
+            // NOISE ANALYSIS
             // ======================
             if (data.contains("Noise level")) {
 
                 int noise = 0;
+
                 int indexNoise = data.indexOf("Noise level ");
+
                 if (indexNoise != -1) {
+
                     int start = indexNoise + "Noise level ".length();
                     int end = data.indexOf(" dB", start);
+
                     if (end != -1) {
                         String noiseStr = data.substring(start, end).trim();
                         noise = Integer.parseInt(noiseStr);
@@ -43,6 +99,7 @@ public class TrafficAnalyzer {
                 db.insertNoise(routeId, sensorId, noise);
 
                 if (noise > 85) {
+
                     System.out.println("ALERT: High Noise Level detected!");
 
                     int eventId = db.insertEvent(
@@ -61,23 +118,24 @@ public class TrafficAnalyzer {
             }
 
             // ======================
-            // CAS ACCIDENT
+            // ACCIDENT ANALYSIS
             // ======================
             if (data.toLowerCase().contains("accident")) {
 
                 System.out.println("ALERT: Accident detected!");
 
-                // Extraire la description après "RouteX:"
                 String[] parts = data.split(":");
                 String description = parts.length > 1 ? parts[1].trim() : "Accident non precise";
 
-                // Insérer dans la DB (accident -> evenement -> recommandation -> alerte)
                 db.insertAccidentFull(routeId, sensorId, description);
             }
 
         } catch (SQLException e) {
+
             System.out.println("Database error: " + e.getMessage());
+
         } catch (Exception e) {
+
             System.out.println("Error analyzing data: " + e.getMessage());
         }
     }

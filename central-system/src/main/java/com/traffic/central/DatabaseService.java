@@ -112,4 +112,83 @@ public int insertAccident(int routeId, int sensorId, String description) throws 
 
             insertAlert("Accident", routeId, recId);
     }
+
+    // Ajout dans table pollution
+    // Méthode pour insérer la pollution
+    public int insertPollution(int routeId, String typePollution, double niveau) throws SQLException {
+
+    String sql = "INSERT INTO pollution (route_id, type_pollution, niveau, timestamp) VALUES (?, ?, ?, NOW())";
+
+    PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+    ps.setInt(1, routeId);
+    ps.setString(2, typePollution);
+    ps.setDouble(3, niveau);
+
+    ps.executeUpdate();
+
+    ResultSet rs = ps.getGeneratedKeys();
+
+    if (rs.next()) return rs.getInt(1);
+
+    return 0;
+}
+
+public void insertPollutionFull(int routeId, String typePollution, double niveau) throws SQLException {
+
+    int pollutionId = insertPollution(routeId, typePollution, niveau);
+
+    int eventId = insertEvent(
+            "Pollution",
+            routeId,
+            "Niveau de pollution detecte: " + typePollution + " = " + niveau
+    );
+
+    int recId = insertRecommendation(
+            eventId,
+            "Limiter la circulation sur cette route"
+    );
+
+    insertAlert("Pollution", routeId, recId);
+}
+
+// Méthode pour insérer les données de trafic
+public int insertTraffic(int routeId, int volume, double vitesseMoyenne) throws SQLException {
+
+    String sql = "INSERT INTO traffic (route_id, volume, vitesse_moyenne, timestamp) VALUES (?, ?, ?, NOW())";
+
+    PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+    ps.setInt(1, routeId);
+    ps.setInt(2, volume);
+    ps.setDouble(3, vitesseMoyenne);
+
+    ps.executeUpdate();
+
+    ResultSet rs = ps.getGeneratedKeys();
+
+    if (rs.next()) return rs.getInt(1);
+
+    return 0;
+}
+
+ public void insertTrafficFull(int routeId, int volume, double vitesseMoyenne) throws SQLException {
+
+    int trafficId = insertTraffic(routeId, volume, vitesseMoyenne);
+
+    int eventId = insertEvent(
+            "Traffic",
+            routeId,
+            "Volume: " + volume + " vehicules, vitesse moyenne: " + vitesseMoyenne
+    );
+
+    int recId = insertRecommendation(
+            eventId,
+            "Optimiser les feux de circulation"
+    );
+
+    insertAlert("Traffic", routeId, recId);
+}
+
+
 }
