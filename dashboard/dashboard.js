@@ -1,176 +1,134 @@
 // =========================
-// Smart Intersection Dashboard JS
+// Menu et Sections
 // =========================
+function showSection(id) {
+    document.querySelectorAll(".section").forEach(s => s.classList.add("hidden"));
+    const section = document.getElementById(id);
+    if(section) section.classList.remove("hidden");
 
-// =========================
-// Section management
-// =========================
-function showSection(id){
-    let sections = document.querySelectorAll(".section");
-    sections.forEach(section => section.classList.add("hidden"));
-    document.getElementById(id).classList.remove("hidden");
+    if(id === "alerts") showAlertes();
 }
+showSection('dashboard'); // section par défaut
+const alertesData = [
+    { type_alerte: "Bruit eleve", route_id: 1, timestamp: "2026-03-10 04:54:42", action_recommandee: "Rduire trafic ou avertir conducteurs" },
+    { type_alerte: "Bruit eleve", route_id: 3, timestamp: "2026-03-10 04:55:02", action_recommandee: "Rduire trafic ou avertir conducteurs" },
+    { type_alerte: "Accident", route_id: 5, timestamp: "2026-03-11 11:01:47", action_recommandee: "Devier le trafic vers une autre route" },
+    { type_alerte: "Accident", route_id: 5, timestamp: "2026-03-11 11:01:57", action_recommandee: "Devier le trafic vers une autre route" },
+    { type_alerte: "Pollution", route_id: 1, timestamp: "2026-03-14 23:12:53", action_recommandee: "Limiter la circulation sur cette route" },
+    { type_alerte: "Traffic", route_id: 1, timestamp: "2026-03-15 00:40:09", action_recommandee: "Optimiser les feux de circulation" },
+    { type_alerte: "Traffic", route_id: 2, timestamp: "2026-03-15 00:40:13", action_recommandee: "Optimiser les feux de circulation" }
+    // ... tu peux rajouter le reste
+];
+// =========================
+// Cards aléatoires (MAJ toutes les 20s)
+// =========================
+function updateCards() {
+    document.getElementById("cardVehicles").innerHTML =
+        "<h3>Total Vehicles</h3><p>" + Math.floor(Math.random()*500) + "</p>";
+
+    document.getElementById("cardPollution").innerHTML =
+        "<h3>Pollution</h3><p>" + Math.floor(Math.random()*100) + " AQI</p>";
+
+    document.getElementById("cardNoise").innerHTML =
+        "<h3>Noise</h3><p>" + Math.floor(Math.random()*120) + " dB</p>";
+}
+updateCards();
+setInterval(updateCards, 20000); // 🔹 toutes les 20 secondes
 
 // =========================
-// Routes & data
+// Tableau et Graphiques Bruit (DATA RÉELLE)
 // =========================
-const routes = ["centre","nord","sud","est","ouest"];
+let noiseCharts = [];
 
-function updateData(){
-    let totalVehicles = 0;
-    let totalNoise = 0;
-    let totalPollution = 0;
-    const alerts = document.getElementById("alertsList");
-    alerts.innerHTML = ""; // reset alerts
+async function updateDashboard() {
+    const events = await getEvents();
+    const filter = document.getElementById("filterType").value;
+    const noiseData = await getNoiseData();
 
-    routes.forEach(route => {
-        // Simule des données pour le dashboard (ou lire depuis ton serveur si tu veux)
-        let vehicles = Math.floor(Math.random()*200);
-        let noise = Math.floor(Math.random()*90);
-        let pollution = Math.floor(Math.random()*100);
+    // ========== Tableau ========== 
+    const tbody = document.querySelector("#eventsTable tbody");
+    tbody.innerHTML = "";
+    events.filter(e => filter==="All" || e.type_evenement===filter)
+          .slice(-10).reverse()
+          .forEach(e => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${e.type_evenement}</td>
+            <td>${e.route_id}</td>
+            <td>${e.description}</td>
+            <td>${e.timestamp}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-        document.getElementById("veh-"+route).innerText = vehicles;
-        document.getElementById("noise-"+route).innerText = noise;
-        document.getElementById("pollution-"+route).innerText = pollution;
+    // =========================
+    // Graphiques Bruit (chargement unique)
+    // =========================
+    if(noiseCharts.length === 0){ 
+        const routes = [1,2,3,4];
+        let grouped = {};
+        routes.forEach(r => grouped[r] = []);
 
-        totalVehicles += vehicles;
-        totalNoise += noise;
-        totalPollution += pollution;
+        const now = new Date();
+        const oneHourAgo = new Date(now.getTime() - 60*60*1000);
+        noiseData.forEach(n => {
+            const ts = new Date(n.timestamp);
+            if(ts >= oneHourAgo && grouped[n.route_id]){
+                grouped[n.route_id].push(n);
+            }
+        });
 
-        // Alertes pollution
-        if(pollution > 80){
-            alerts.innerHTML += `<li>⚠ Pollution élevée dans ${route}</li>`;
+        for (let r in grouped){
+            grouped[r].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
         }
-    });
 
-    document.getElementById("vehicles").innerText = totalVehicles;
-    document.getElementById("noiseValue").innerText = Math.floor(totalNoise/5) + " dB";
-    document.getElementById("pollutionValue").innerText = Math.floor(totalPollution/5) + " AQI";
-}
+        routes.forEach((routeId, i) => {
+            const ctx = document.getElementById("noiseChart" + (i+1)).getContext("2d");
+            const dataRoute = grouped[routeId];
+            const labels = dataRoute.map(d => d.timestamp.substring(11,16));
+            const values = dataRoute.map(d => d.niveau_db);
 
-// Rafraîchit les données toutes les 4 secondes
-setInterval(updateData, 4000);
-updateData();
-
-// =========================
-// Charts
-// =========================
-const trafficCtx = document.getElementById("trafficChart");
-new Chart(trafficCtx, {
-    type: "line",
-    data: {
-        labels: ["10:00","10:05","10:10","10:15","10:20"],
-        datasets: [{
-            label: "Vehicles",
-            data: [30,45,40,60,70],
-            borderColor: "blue",
-            tension: 0.3
-        }]
-    }
-});
-
-const pollutionCtx = document.getElementById("pollutionChart");
-new Chart(pollutionCtx, {
-    type: "bar",
-    data: {
-        labels: ["CO2","PM10","PM2.5"],
-        datasets: [{
-            label: "Pollution Level",
-            data: [40,55,35],
-            backgroundColor: ["red","orange","green"]
-        }]
-    }
-});
-
-// =========================
-// Map + vehicles
-// =========================
-var map = L.map('map').setView([33.5731,-7.5898],16);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:19,
-    attribution:'&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-// Intersection marker
-var intersectionMarker = L.marker([33.5731,-7.5898],{
-    title: "Smart Intersection",
-    riseOnHover:true
-}).addTo(map).bindPopup("<b>Smart Intersection</b><br>Traffic Control Center");
-
-// Zone de surveillance
-L.circle([33.5731,-7.5898],{
-    color:'blue',
-    fillColor:'#3399ff',
-    fillOpacity:0.1,
-    radius:100
-}).addTo(map);
-
-// Crée plusieurs véhicules
-var vehicles = [];
-for(let i=0;i<5;i++){
-    let lat = 33.5730 + (Math.random()*0.001-0.0005);
-    let lng = -7.5895 + (Math.random()*0.001-0.0005);
-    let car = L.marker([lat,lng],{
-        icon: L.icon({
-            iconUrl:'https://cdn-icons-png.flaticon.com/512/743/743920.png',
-            iconSize:[32,32],
-            iconAnchor:[16,16]
-        }),
-        title:`Vehicle ${i+1}`
-    }).addTo(map).bindPopup(`Vehicle ${i+1}`);
-    vehicles.push(car);
-}
-
-// Déplacement aléatoire des véhicules
-function moveVehicles(){
-    vehicles.forEach(car=>{
-        let lat = 33.5730 + (Math.random()*0.001-0.0005);
-        let lng = -7.5895 + (Math.random()*0.001-0.0005);
-        car.setLatLng([lat,lng]);
-    });
-}
-setInterval(moveVehicles,2000);
-
-// =========================
-// Feux dynamiques  (DOHA)
-// =========================
-function updateLights(lightDiv, color){
-    if(!lightDiv || !color) return;
-    let lights = lightDiv.querySelectorAll(".light");
-    lights.forEach(l => l.classList.remove("active","red","yellow","green"));
-
-    const c = color.toUpperCase();
-    if(c==="RED") lights[0].classList.add("active","red");
-    else if(c==="YELLOW") lights[1].classList.add("active","yellow");
-    else if(c==="GREEN") lights[2].classList.add("active","green");
-}
-
-function loadTrafficLights(){
-    fetch("http://localhost:8889/trafficLights?time="+Date.now())
-    .then(res=>res.json())
-    .then(data=>{
-        data.forEach(item=>{
-            const div = document.getElementById("light-"+item.route.toLowerCase());
-            updateLights(div,item.light);
+            noiseCharts[i] = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Route " + routeId,
+                        data: values,
+                        borderColor: "#2563eb",
+                        backgroundColor: "rgba(37, 99, 235, 0.3)",
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: "Temps" } },
+                        y: { beginAtZero: true, title: { display: true, text: "dB" } }
+                    }
+                }
+            });
         });
-    })
-    .catch(err=>{
-        console.error("API ERROR:",err);
-        // fallback statique
-        const fallback = [
-            {"route":"centre","light":"RED"},
-            {"route":"nord","light":"RED"},
-            {"route":"sud","light":"RED"},
-            {"route":"est","light":"GREEN"},
-            {"route":"ouest","light":"GREEN"}
-        ];
-        fallback.forEach(item=>{
-            const div = document.getElementById("light-"+item.route.toLowerCase());
-            updateLights(div,item.light);
-        });
+    }
+}
+updateDashboard();
+
+// =========================
+// Section ALERTES
+function showAlertes() {
+    console.log("Affichage manuel des alertes"); // Vérifie que ça s'exécute
+    const container = document.getElementById("alertesContainer");
+    container.innerHTML = "";
+
+    alertesData.forEach(a => {
+        const div = document.createElement("div");
+        div.classList.add("alert-card");
+        div.innerHTML = `
+            <h3>Alerte: ${a.type_alerte} (Route ${a.route_id})</h3>
+            <p>Heure: ${a.timestamp}</p>
+            <p class="recommandation">Recommandation: ${a.action_recommandee}</p>
+        `;
+        container.appendChild(div);
     });
 }
-
-setInterval(loadTrafficLights,5000);
-loadTrafficLights();

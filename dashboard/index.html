@@ -1,214 +1,135 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <title>SmartCity Dashboard</title>
 
-<meta charset="UTF-8">
-<title>Smart Intersection Control Center</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
 
-<link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
+    <!-- ICONS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
-<div class="container">
-
 <div class="sidebar">
-
-<h2>🚦 SmartCity</h2>
-
-<ul>
-<li onclick="showSection('dashboard')">🏠 Dashboard</li>
-<li onclick="showSection('traffic')">🚗 Traffic</li>
-<li onclick="showSection('pollution')">🌫 Pollution</li>
-<li onclick="showSection('zones')">📊 Zone Statistics</li>
-<li onclick="showSection('mapSection')">🗺 Map</li>
-<li onclick="showSection('lights')">🚦 Lights</li>
-<li onclick="showSection('alerts')">⚠ Alerts</li>
-</ul>
-
+    <h2>
+    <i class="fas fa-city"></i> SmartCity <i class="fas fa-city"></i>
+</h2>
+    <ul>
+        <li onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</li>
+        <li onclick="showSection('traffic')"><i class="fas fa-car"></i> Traffic</li>
+        <li onclick="showSection('pollution')"><i class="fas fa-smog"></i> Pollution</li>
+        <li onclick="showSection('zones')"><i class="fas fa-map"></i> Zone Statistics</li>
+        <li onclick="showSection('mapSection')"><i class="fas fa-map-marked-alt"></i> Map</li>
+        <li onclick="showSection('lights')"><i class="fas fa-traffic-light"></i> Lights</li>
+        <li onclick="showSection('alerts')"><i class="fas fa-bell"></i> Alerts</li>
+    </ul>
 </div>
 
 <div class="content">
+    <!-- === DASHBOARD === -->
+    <div id="dashboard" class="section">
+        <h2>System Overview</h2>
 
-<!-- DASHBOARD -->
+        <div class="cards">
+            <div class="card" id="cardVehicles">Total Vehicles</div>
+            <div class="card" id="cardPollution">Pollution</div>
+            <div class="card" id="cardNoise">Noise</div>
+        </div>
 
-<div id="dashboard" class="section">
+        <h2><i class="fas fa-list" style="color:#2563eb;"></i> Derniers événements</h2>
+        <select id="filterType" onchange="updateDashboard()">
+            <option value="All">Tous</option>
+            <option value="Traffic">Traffic</option>
+            <option value="Pollution">Pollution</option>
+            <option value="Accident">Accident</option>
+            <option value="Bruit eleve">Bruit</option>
+        </select>
 
-<h1>System Overview</h1>
+        <table id="eventsTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Route</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
-<div class="cards">
+        <h2>
+    <i class="fas fa-volume-up" style="color:#2563eb;"></i> 📈 Évolution du bruit par route
+</h2>
+        <div class="charts">
+            <div class="chart-box"><h3>Route Nord</h3><canvas id="noiseChart1"></canvas></div>
+            <div class="chart-box"><h3>Route Sud</h3><canvas id="noiseChart2"></canvas></div>
+            <div class="chart-box"><h3>Route Est</h3><canvas id="noiseChart3"></canvas></div>
+            <div class="chart-box"><h3>Route Ouest</h3><canvas id="noiseChart4"></canvas></div>
+        </div>
+    </div>
 
-<div class="card">
-<h3>Total Vehicles</h3>
-<p id="vehicles">0</p>
+    <!-- === AUTRES SECTIONS === -->
+    <div id="traffic" class="section hidden"></div>
+    <div id="pollution" class="section hidden"></div>
+    <div id="zones" class="section hidden"></div>
+    <div id="mapSection" class="section hidden"></div>
+    <div id="lights" class="section hidden"></div>
+
+<!-- === ALERTES === -->
+<div id="alerts" class="section" style="margin-top:20px;">
+    <h2>⚠️ Alertes et Recommandations</h2>
+    <div class="alertes-container" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+        <div class="alert-card alert-bruit" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #facc15; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-volume-up"></i> Bruit élevé (Route 1)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-10 04:54:42</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Réduire trafic ou avertir conducteurs</p>
+        </div>
+
+        <div class="alert-card alert-bruit" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #facc15; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-volume-up"></i> Bruit élevé (Route 3)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-10 04:55:02</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Réduire trafic ou avertir conducteurs</p>
+        </div>
+
+        <div class="alert-card alert-accident" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #dc2626; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-car-crash"></i> Accident (Route 5)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-11 11:01:47</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Détourner le trafic vers une autre route</p>
+        </div>
+
+        <div class="alert-card alert-accident" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #dc2626; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-car-crash"></i> Accident (Route 5)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-11 11:01:57</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Détourner le trafic vers une autre route</p>
+        </div>
+
+        <div class="alert-card alert-pollution" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #4b5563; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-smog"></i> Pollution (Route 1)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-14 23:12:53</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Limiter la circulation sur cette route</p>
+        </div>
+
+        <div class="alert-card alert-traffic" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #2563eb; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-car"></i> Traffic (Route 1)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-15 00:40:09</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Optimiser les feux de circulation</p>
+        </div>
+
+        <div class="alert-card alert-traffic" style="background-color:#f0f4ff; padding:15px 20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border-left:5px solid #2563eb; transition:transform 0.2s, box-shadow 0.2s;">
+            <h3 style="margin:0 0 8px 0; font-size:18px; color:#1e40af; display:flex; align-items:center; gap:8px;"><i class="fas fa-car"></i> Traffic (Route 2)</h3>
+            <p style="margin:4px 0; font-size:14px;"><strong>Heure:</strong> 2026-03-15 00:40:13</p>
+            <p class="recommandation" style="font-weight:bold; color:#047857;">Recommandation: Optimiser les feux de circulation</p>
+        </div>
+    </div>
+</div>
 </div>
 
-<div class="card">
-<h3>Average Pollution</h3>
-<p id="pollutionValue">0 AQI</p>
-</div>
-
-<div class="card">
-<h3>Average Noise</h3>
-<p id="noiseValue">0 dB</p>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- TRAFFIC -->
-
-<div id="traffic" class="section hidden">
-
-<h1>Traffic Monitoring</h1>
-
-<canvas id="trafficChart"></canvas>
-
-</div>
-
-
-<!-- POLLUTION -->
-
-<div id="pollution" class="section hidden">
-
-<h1>Pollution Monitoring</h1>
-
-<canvas id="pollutionChart"></canvas>
-
-</div>
-
-
-<!-- ZONES -->
-
-<div id="zones" class="section hidden">
-
-<h1>Zone Statistics</h1>
-
-<div class="cards">
-
-<div class="card">
-<h3>Centre</h3>
-<p>Vehicles: <span id="veh-centre">0</span></p>
-<p>Noise: <span id="noise-centre">0</span> dB</p>
-<p>Pollution: <span id="pollution-centre">0</span></p>
-</div>
-
-<div class="card">
-<h3>Nord</h3>
-<p>Vehicles: <span id="veh-nord">0</span></p>
-<p>Noise: <span id="noise-nord">0</span> dB</p>
-<p>Pollution: <span id="pollution-nord">0</span></p>
-</div>
-
-<div class="card">
-<h3>Sud</h3>
-<p>Vehicles: <span id="veh-sud">0</span></p>
-<p>Noise: <span id="noise-sud">0</span> dB</p>
-<p>Pollution: <span id="pollution-sud">0</span></p>
-</div>
-
-<div class="card">
-<h3>Est</h3>
-<p>Vehicles: <span id="veh-est">0</span></p>
-<p>Noise: <span id="noise-est">0</span> dB</p>
-<p>Pollution: <span id="pollution-est">0</span></p>
-</div>
-
-<div class="card">
-<h3>Ouest</h3>
-<p>Vehicles: <span id="veh-ouest">0</span></p>
-<p>Noise: <span id="noise-ouest">0</span> dB</p>
-<p>Pollution: <span id="pollution-ouest">0</span></p>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- MAP -->
-
-<div id="mapSection" class="section hidden">
-
-<h1>Intersection Map</h1>
-
-<div id="map"></div>
-
-</div>
-
-
-<!-- LIGHTS -->
-
-<div id="lights" class="section hidden">
-
-<h1>Traffic Lights</h1>
-
-<div class="lights-grid">
-
-<div class="traffic-light" id="light-centre">
-<h3>Centre</h3>
-<div class="light red"></div>
-<div class="light yellow"></div>
-<div class="light green active"></div>
-</div>
-
-<div class="traffic-light" id="light-nord">
-<h3>Nord</h3>
-<div class="light red"></div>
-<div class="light yellow"></div>
-<div class="light green"></div>
-</div>
-
-<div class="traffic-light" id="light-sud">
-<h3>Sud</h3>
-<div class="light red"></div>
-<div class="light yellow"></div>
-<div class="light green"></div>
-</div>
-
-<div class="traffic-light" id="light-est">
-<h3>Est</h3>
-<div class="light red"></div>
-<div class="light yellow"></div>
-<div class="light green"></div>
-</div>
-
-<div class="traffic-light" id="light-ouest">
-<h3>Ouest</h3>
-<div class="light red"></div>
-<div class="light yellow"></div>
-<div class="light green"></div>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- ALERTS -->
-
-<div id="alerts" class="section hidden">
-
-<h1>System Alerts</h1>
-
-<ul id="alertsList"></ul>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="app.js"></script>
-
+<script src="api-client.js"></script>
+<script src="dashboard.js"></script>
 </body>
 </html>
