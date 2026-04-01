@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.sql.*;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -49,6 +50,7 @@ public class SimpleHttpServer {
 
             String response = array.toString();
             exchange.sendResponseHeaders(200, response.length());
+
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
@@ -73,11 +75,13 @@ public class SimpleHttpServer {
 
                 while (rs.next()) {
                     JSONObject obj = new JSONObject();
+
                     obj.put("id", rs.getInt("id"));
                     obj.put("sensor_id", rs.getInt("sensor_id"));
                     obj.put("route_id", rs.getInt("route_id"));
                     obj.put("niveau_db", rs.getInt("niveau_db"));
                     obj.put("timestamp", rs.getString("timestamp"));
+
                     array.put(obj);
                 }
 
@@ -87,60 +91,146 @@ public class SimpleHttpServer {
 
             String response = array.toString();
             exchange.sendResponseHeaders(200, response.length());
+
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
         });
 
         // =========================
-        // API ALERTES ✅ (NOUVEAU)
+        // API ALERTES
         // =========================
         server.createContext("/api/alertes", (HttpExchange exchange) -> {
 
-    exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-    exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
 
-    JSONArray array = new JSONArray();
+            JSONArray array = new JSONArray();
 
-    try {
-        DatabaseService db = new DatabaseService();
+            try {
+                DatabaseService db = new DatabaseService();
 
                 String sql = "SELECT a.type_alerte, a.route_id, a.timestamp, r.action_recommandee " +
-             "FROM alertes a " +
-             "JOIN recommandations r ON a.recommandation_id = r.id " +
-             "ORDER BY a.timestamp DESC";
-        Statement st = db.getConnection().createStatement();
-        ResultSet rs = st.executeQuery(sql);
+                             "FROM alertes a " +
+                             "JOIN recommandations r ON a.recommandation_id = r.id " +
+                             "ORDER BY a.timestamp DESC";
 
-        while (rs.next()) {
-            JSONObject obj = new JSONObject();
+                Statement st = db.getConnection().createStatement();
+                ResultSet rs = st.executeQuery(sql);
 
-            obj.put("type_alerte", rs.getString("type_alerte"));
-            obj.put("route_id", rs.getInt("route_id"));
-            obj.put("timestamp", rs.getString("timestamp"));
-            obj.put("action_recommandee", rs.getString("action_recommandee"));
+                while (rs.next()) {
+                    JSONObject obj = new JSONObject();
 
-            array.put(obj);
-        }
+                    obj.put("type_alerte", rs.getString("type_alerte"));
+                    obj.put("route_id", rs.getInt("route_id"));
+                    obj.put("timestamp", rs.getString("timestamp"));
+                    obj.put("action_recommandee", rs.getString("action_recommandee"));
 
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
+                    array.put(obj);
+                }
 
-    String response = array.toString();
-    exchange.sendResponseHeaders(200, response.length());
-    OutputStream os = exchange.getResponseBody();
-    os.write(response.getBytes());
-    os.close();
-});
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            String response = array.toString();
+            exchange.sendResponseHeaders(200, response.length());
+
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        });
+
+        // =========================
+        // API TRAFFIC ✅ (TA PARTIE)
+        // =========================
+        server.createContext("/api/traffic", (HttpExchange exchange) -> {
+
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+
+            JSONArray array = new JSONArray();
+
+            try {
+                DatabaseService db = new DatabaseService();
+
+                String sql = "SELECT * FROM traffic";
+                Statement st = db.getConnection().createStatement();
+                ResultSet rs = st.executeQuery(sql);
+
+                while (rs.next()) {
+                    JSONObject obj = new JSONObject();
+
+                    obj.put("id", rs.getInt("id"));
+                    obj.put("route_id", rs.getInt("route_id"));
+                    obj.put("density", rs.getInt("density"));
+                    obj.put("timestamp", rs.getString("timestamp"));
+
+                    array.put(obj);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            String response = array.toString();
+            exchange.sendResponseHeaders(200, response.length());
+
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        });
+
+        // =========================
+        // API POLLUTION ✅ (TA PARTIE)
+        // =========================
+        server.createContext("/api/pollution", (HttpExchange exchange) -> {
+
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+
+            JSONArray array = new JSONArray();
+
+            try {
+                DatabaseService db = new DatabaseService();
+
+                String sql = "SELECT * FROM pollution";
+                Statement st = db.getConnection().createStatement();
+                ResultSet rs = st.executeQuery(sql);
+
+                while (rs.next()) {
+                    JSONObject obj = new JSONObject();
+
+                    obj.put("id", rs.getInt("id"));
+                    obj.put("route_id", rs.getInt("route_id"));
+                    obj.put("co2_level", rs.getDouble("co2_level"));
+                    obj.put("timestamp", rs.getString("timestamp"));
+
+                    array.put(obj);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            String response = array.toString();
+            exchange.sendResponseHeaders(200, response.length());
+
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        });
 
         // =========================
         // START SERVER
         // =========================
         server.start();
+
         System.out.println("✅ Server running on:");
         System.out.println("http://localhost:8080/api/events");
         System.out.println("http://localhost:8080/api/noise");
         System.out.println("http://localhost:8080/api/alertes");
+        System.out.println("http://localhost:8080/api/traffic");
+        System.out.println("http://localhost:8080/api/pollution");
     }
 }

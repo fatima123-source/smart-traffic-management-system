@@ -75,13 +75,15 @@ body {
 }
 
 .card {
-    padding: 20px;
-    border-radius: 15px;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
     color: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: transform 0.3s, box-shadow 0.3s;
     text-align: center;
-    transition: 0.3s;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
+
 
 .card h3 {
     font-size: 16px;
@@ -107,8 +109,8 @@ body {
 
 /* Hover léger et pro */
 .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
 }
 /* === TABLE === */
 table {
@@ -215,4 +217,103 @@ canvas {
 .alert-card .recommandation {
     font-weight: bold;
     color: #047857;
+}
+#cardVehicles {
+    background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+}
+
+#cardPollution {
+    background: linear-gradient(135deg, #ef4444, #7f1d1d);
+}
+
+#cardNoise {
+    background: linear-gradient(135deg, #10b981, #065f46);
+}
+
+/* ===== AMELIORATION DESIGN PREMIUM ===== */
+
+/* 🌈 Background global plus moderne */
+body {
+    background: linear-gradient(120deg, #f1f5f9, #e2e8f0);
+}
+
+/* ✨ Effet glass sur content */
+.content {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+}
+
+/* 🧱 Amélioration cards (effet glow léger) */
+.card {
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+    top: -50%;
+    left: -50%;
+    transform: rotate(25deg);
+    pointer-events: none;
+}
+
+/* ✨ Animation smooth */
+.section {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 📊 Chart box plus clean */
+.chart-box {
+    background: linear-gradient(145deg, #ffffff, #e2e8f0);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+/* 🧭 Sidebar hover plus stylé */
+.sidebar ul li:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    transform: translateX(8px) scale(1.02);
+}
+
+/* 🔥 Badge effet pour cards (optionnel futur) */
+.card span {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* 📱 Responsive (important pour démo) */
+@media (max-width: 900px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .charts {
+        grid-template-columns: 1fr;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
 }
